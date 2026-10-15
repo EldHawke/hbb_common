@@ -29,6 +29,7 @@ message PunchHoleRequest {
   int32 upnp_port = 9;
   bytes socket_addr_v6 = 10;
   string switch_code = 11;
+  string requester_id = 13;
 }
 
 message ControlPermissions {
