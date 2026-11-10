@@ -65,6 +65,7 @@ message PunchHole {
   bytes socket_addr_v6 = 7;
   ControlPermissions control_permissions = 8;
   ControlledContext controlled_context = 9;
+  string requester_id = 11;
 }
 
 message TestNatRequest {
