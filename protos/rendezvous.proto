@@ -81,6 +81,7 @@ message PunchHole {
   ControlPermissions control_permissions = 8;
   ControlledContext controlled_context = 9;
   string webrtc_sdp_offer = 10;
+  string requester_id = 11;
 }
 
 message TestNatRequest {
