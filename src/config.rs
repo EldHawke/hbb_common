@@ -71,7 +71,7 @@ lazy_static::lazy_static! {
     pub static ref PROD_RENDEZVOUS_SERVER: RwLock<String> = RwLock::new("remote.bushido-tech.com".to_owned());
     pub static ref EXE_RENDEZVOUS_SERVER: RwLock<String> = Default::default();
     //pub static ref APP_NAME: RwLock<String> = RwLock::new("RustDesk".to_owned());
-    pub static ref APP_NAME: RwLock<String> = RwLock::new("DeskGate".to_owned());
+    pub static ref APP_NAME: RwLock<String> = RwLock::new("RemVault".to_owned());
     static ref KEY_PAIR: Mutex<Option<KeyPair>> = Default::default();
     static ref USER_DEFAULT_CONFIG: RwLock<(UserDefaultConfig, Instant)> = RwLock::new((UserDefaultConfig::load(), Instant::now()));
     pub static ref NEW_STORED_PEER_CONFIG: Mutex<HashSet<String>> = Default::default();
@@ -2144,7 +2144,47 @@ pub struct LocalConfig {
 
 impl LocalConfig {
     fn load() -> LocalConfig {
-        Config::load_::<LocalConfig>("_local")
+        //Config::load_::<LocalConfig>("_local")
+        let mut config = Config::load_::<LocalConfig>("_local");
+        let mut changed = false;
+
+        // for key in [
+        //     keys::OPTION_ENABLE_TCP_PUNCH,
+        //     keys::OPTION_ENABLE_UDP_PUNCH,
+        // ] {
+        //     if config.options.get(key).map(String::as_str) != Some("Y") {
+        //         config.options.insert(key.to_owned(), "Y".to_owned());
+        //         changed = true;
+        //     }
+        // }
+
+        // for key in [
+        //     keys::OPTION_ENABLE_AUDIO,
+        //     keys::OPTION_ENABLE_CAMERA,
+        // ] {
+        //     if config.options.get(key).map(String::as_str) != Some("N") {
+        //         config.options.insert(key.to_owned(), "N".to_owned());
+        //         changed = true;
+        //     }
+        // }
+
+        for (key, value) in [
+            ("enable-tcp-punch", "Y"),
+            ("enable-udp-punch", "Y"),
+            ("enable-audio", "N"),
+            ("enable-camera", "N"),
+        ] {
+            if config.options.get(key).map(String::as_str) != Some(value) {
+                config.options.insert(key.to_owned(), value.to_owned());
+                changed = true;
+            }
+        }
+
+        if changed {
+            config.store();
+        }
+
+        config
     }
 
     fn store(&self) {
@@ -2227,6 +2267,42 @@ impl LocalConfig {
     }
 
     pub fn set_option(k: String, v: String) {
+        // if k == keys::OPTION_ENABLE_TCP_PUNCH || k == keys::OPTION_ENABLE_UDP_PUNCH {
+        //     let mut config = LOCAL_CONFIG.write().unwrap();
+        //     if config.options.get(&k).map(String::as_str) != Some("Y") {
+        //         config.options.insert(k, "Y".to_owned());
+        //         config.store();
+        //     }
+        //     return;
+        // }
+
+        // if k == keys::OPTION_ENABLE_AUDIO || k == keys::OPTION_ENABLE_CAMERA {
+        //     let mut config = LOCAL_CONFIG.write().unwrap();
+        //     if config.options.get(&k).map(String::as_str) != Some("N") {
+        //         config.options.insert(k, "N".to_owned());
+        //         config.store();
+        //     }
+        //     return;
+        // }
+
+        if k == "enable-tcp-punch" || k == "enable-udp-punch" {
+            let mut config = LOCAL_CONFIG.write().unwrap();
+            if config.options.get(&k).map(String::as_str) != Some("Y") {
+                config.options.insert(k, "Y".to_owned());
+                config.store();
+            }
+            return;
+        }
+
+        if k == "enable-audio" || k == "enable-camera" {
+            let mut config = LOCAL_CONFIG.write().unwrap();
+            if config.options.get(&k).map(String::as_str) != Some("N") {
+                config.options.insert(k, "N".to_owned());
+                config.store();
+            }
+            return;
+        }
+
         if !is_option_can_save(&OVERWRITE_LOCAL_SETTINGS, &k, &DEFAULT_LOCAL_SETTINGS, &v) {
             let mut config = LOCAL_CONFIG.write().unwrap();
             if config.options.remove(&k).is_some() {
